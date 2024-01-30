@@ -1,0 +1,11 @@
+package cache
+
+import "time"
+
+type Cacher interface {
+	Set(k string, v []byte, ttl time.Duration) error
+	Has(k string) bool
+	Get(k string) (v []byte, err error)
+	Delete(k string) error
+	String() string
+}

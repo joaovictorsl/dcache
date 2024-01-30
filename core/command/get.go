@@ -3,19 +3,20 @@ package command
 import (
 	"fmt"
 
-	"github.com/joaovictorsl/dcache/cache"
+	"github.com/joaovictorsl/dcache/core"
+	"github.com/joaovictorsl/dcache/core/cache"
 )
 
 type GetCommand struct {
-	Key []byte
+	Key string
 }
 
 func (msg *GetCommand) ToBytes() []byte {
 	return []byte(fmt.Sprintf("GET %s", msg.Key))
 }
 
-func (msg *GetCommand) Type() string {
-	return CMDGet
+func (msg *GetCommand) Type() byte {
+	return core.CMD_GET
 }
 
 func (msg *GetCommand) Execute(c cache.Cacher) ([]byte, error) {
@@ -31,13 +32,8 @@ func (msg *GetCommand) ModifiesCache() bool {
 	return false
 }
 
-func NewGetCommand(cmdParts []string) (*GetCommand, error) {
-	partsLen := len(cmdParts)
-	if partsLen != 2 {
-		return nil, fmt.Errorf("invalid GET command")
-	}
-
+func NewGetCommand(k string) *GetCommand {
 	return &GetCommand{
-		Key: []byte(cmdParts[1]),
-	}, nil
+		Key: k,
+	}
 }

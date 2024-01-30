@@ -3,19 +3,20 @@ package command
 import (
 	"fmt"
 
-	"github.com/joaovictorsl/dcache/cache"
+	"github.com/joaovictorsl/dcache/core"
+	"github.com/joaovictorsl/dcache/core/cache"
 )
 
 type HasCommand struct {
-	Key []byte
+	Key string
 }
 
 func (msg *HasCommand) ToBytes() []byte {
 	return []byte(fmt.Sprintf("HAS %s", msg.Key))
 }
 
-func (msg *HasCommand) Type() string {
-	return CMDHas
+func (msg *HasCommand) Type() byte {
+	return core.CMD_HAS
 }
 
 func (msg *HasCommand) Execute(c cache.Cacher) ([]byte, error) {
@@ -23,9 +24,9 @@ func (msg *HasCommand) Execute(c cache.Cacher) ([]byte, error) {
 
 	var res []byte
 	if found {
-		res = []byte{1}
+		res = []byte("true")
 	} else {
-		res = []byte{0}
+		res = []byte("false")
 	}
 
 	return res, nil
@@ -35,13 +36,8 @@ func (msg *HasCommand) ModifiesCache() bool {
 	return false
 }
 
-func NewHasCommand(cmdParts []string) (*HasCommand, error) {
-	partsLen := len(cmdParts)
-	if partsLen != 2 {
-		return nil, fmt.Errorf("invalid HAS command")
-	}
-
+func NewHasCommand(k string) *HasCommand {
 	return &HasCommand{
-		Key: []byte(cmdParts[1]),
-	}, nil
+		Key: k,
+	}
 }
