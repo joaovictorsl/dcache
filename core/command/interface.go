@@ -5,7 +5,7 @@ import (
 )
 
 type Command interface {
-	ToBytes() []byte
+	String() string
 	Type() byte
 	ModifiesCache() bool
 	Execute(cache.Cacher) (res []byte, err error)

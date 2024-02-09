@@ -14,8 +14,8 @@ type SetCommand struct {
 	TTL   time.Duration
 }
 
-func (msg *SetCommand) ToBytes() []byte {
-	return []byte(fmt.Sprintf("SET %s %s %d", msg.Key, msg.Value, msg.TTL.Milliseconds()))
+func (msg *SetCommand) String() string {
+	return fmt.Sprintf("SET %s %s %d", msg.Key, msg.Value, msg.TTL.Milliseconds())
 }
 
 func (msg *SetCommand) Type() byte {

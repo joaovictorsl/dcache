@@ -11,8 +11,8 @@ type HasCommand struct {
 	Key string
 }
 
-func (msg *HasCommand) ToBytes() []byte {
-	return []byte(fmt.Sprintf("HAS %s", msg.Key))
+func (msg *HasCommand) String() string {
+	return fmt.Sprintf("HAS %s", msg.Key)
 }
 
 func (msg *HasCommand) Type() byte {

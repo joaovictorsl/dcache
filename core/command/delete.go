@@ -11,8 +11,8 @@ type DeleteCommand struct {
 	Key string
 }
 
-func (msg *DeleteCommand) ToBytes() []byte {
-	return []byte(fmt.Sprintf("DELETE %s", msg.Key))
+func (msg *DeleteCommand) String() string {
+	return fmt.Sprintf("DELETE %s", msg.Key)
 }
 
 func (msg *DeleteCommand) Type() byte {

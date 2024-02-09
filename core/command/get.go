@@ -11,8 +11,8 @@ type GetCommand struct {
 	Key string
 }
 
-func (msg *GetCommand) ToBytes() []byte {
-	return []byte(fmt.Sprintf("GET %s", msg.Key))
+func (msg *GetCommand) String() string {
+	return fmt.Sprintf("GET %s", msg.Key)
 }
 
 func (msg *GetCommand) Type() byte {
