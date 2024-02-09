@@ -19,17 +19,17 @@ func (msg *HasCommand) Type() byte {
 	return core.CMD_HAS
 }
 
-func (msg *HasCommand) Execute(c cache.Cacher) ([]byte, error) {
+func (msg *HasCommand) Execute(c cache.ICache) []byte {
 	found := c.Has(msg.Key)
 
 	var res []byte
 	if found {
-		res = []byte("true")
+		res = []byte{core.CMD_EXEC_SUCCEEDED}
 	} else {
-		res = []byte("false")
+		res = []byte{core.CMD_EXEC_FAILED}
 	}
 
-	return res, nil
+	return res
 }
 
 func (msg *HasCommand) ModifiesCache() bool {

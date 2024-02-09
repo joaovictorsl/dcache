@@ -8,5 +8,5 @@ type Command interface {
 	String() string
 	Type() byte
 	ModifiesCache() bool
-	Execute(cache.Cacher) (res []byte, err error)
+	Execute(cache.ICache) []byte
 }

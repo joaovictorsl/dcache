@@ -66,6 +66,9 @@ func (c *CleanIntervalCache) Set(k string, v []byte, ttl time.Duration) error {
 
 	exp := time.Now().Add(ttl)
 	c.keyExpMap[k] = exp
+	if ok := c.storage.Put(k, v); !ok {
+		return fmt.Errorf("failed to set key (%s)", k)
+	}
 
 	return nil
 }

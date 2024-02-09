@@ -5,16 +5,17 @@ import (
 	"log"
 	"net"
 
+	"github.com/joaovictorsl/dcache/core"
 	"github.com/joaovictorsl/dcache/core/cache"
 	"github.com/joaovictorsl/dcache/core/protocol"
 )
 
 type Server struct {
-	cache cache.Cacher
+	cache cache.ICache
 	port  string
 }
 
-func NewServer(port string, c cache.Cacher) *Server {
+func NewServer(port string, c cache.ICache) *Server {
 	return &Server{
 		cache: c,
 		port:  port,
@@ -58,15 +59,10 @@ func (s *Server) handleConn(conn net.Conn) {
 func (s *Server) handleCommand(conn net.Conn, rawCmd []byte) {
 	cmd, err := protocol.ParseCommand(rawCmd)
 	if err != nil {
-		conn.Write([]byte(err.Error()))
+		log.Println(err.Error())
+		conn.Write([]byte{core.INVALID_COMMAND_CODE})
 		return
 	}
 
-	res, err := cmd.Execute(s.cache)
-	if err != nil {
-		conn.Write([]byte(err.Error()))
-		return
-	}
-
-	conn.Write(res)
+	conn.Write(cmd.Execute(s.cache))
 }

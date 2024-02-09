@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/joaovictorsl/dcache/client/ring"
+	"github.com/joaovictorsl/dcache/core"
 	"github.com/joaovictorsl/dcache/core/command"
 )
 
@@ -90,24 +91,44 @@ func (c *DCacheClient) Connect(retries uint, retryInterval time.Duration) *DCach
 	return nil
 }
 
-func (c *DCacheClient) Set(key string, value []byte, ttl uint32) ([]byte, *DCacheError) {
+func (c *DCacheClient) Set(key string, value []byte, ttl uint32) *DCacheError {
 	cmd := command.SetCmdAsBytes(key, value, ttl)
-	return c.execCmd(cmd, key)
+	res, err := c.execCmd(cmd, key)
+	if err != nil {
+		return err
+	} else if res[0] == core.CMD_EXEC_FAILED {
+		return dCacheSetCmdFailedError(key)
+	}
+
+	return nil
 }
 
-func (c *DCacheClient) Get(key string) ([]byte, *DCacheError) {
+func (c *DCacheClient) Get(key string) ([]byte, bool, *DCacheError) {
 	cmd := command.GetCmdAsBytes(key)
-	return c.execCmd(cmd, key)
+	res, err := c.execCmd(cmd, key)
+	if err != nil {
+		return nil, false, err
+	} else if res[0] == core.CMD_EXEC_FAILED {
+		return nil, false, nil
+	}
+
+	return res[1:], true, nil
 }
 
-func (c *DCacheClient) Delete(key string) ([]byte, *DCacheError) {
+func (c *DCacheClient) Delete(key string) *DCacheError {
 	cmd := command.DeleteCmdAsBytes(key)
-	return c.execCmd(cmd, key)
+	_, err := c.execCmd(cmd, key)
+	return err
 }
 
-func (c *DCacheClient) Has(key string) ([]byte, *DCacheError) {
+func (c *DCacheClient) Has(key string) (bool, *DCacheError) {
 	cmd := command.HasCmdAsBytes(key)
-	return c.execCmd(cmd, key)
+	res, err := c.execCmd(cmd, key)
+	if err != nil {
+		return false, err
+	}
+
+	return res[0] == core.CMD_EXEC_SUCCEEDED, nil
 }
 
 // Ends current client, closes all node connections.
@@ -144,7 +165,7 @@ func (c *DCacheClient) execCmd(cmd []byte, key string) ([]byte, *DCacheError) {
 func (c *DCacheClient) selectTargetConn(key string) (*dCacheConn, *DCacheError) {
 	addr, ok := c.dcring.Get(key)
 	if !ok {
-		return nil, dCacheKeyNotFoundError(key)
+		return nil, dCacheConnNotFoundError(key)
 	}
 
 	dconn := c.conns[addr]

@@ -71,6 +71,11 @@ func (bs *BoundedStorage) Put(k string, v []byte) (ok bool) {
 		}
 	}
 
+	if bucket == -1 {
+		// Key doesn't fit in any bucket
+		return false
+	}
+
 	p, ok := bs.sizeKeyIndexMap[bucket].Occupy(string(k))
 	if !ok {
 		return false

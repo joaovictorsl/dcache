@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/joaovictorsl/dcache/core"
@@ -22,13 +23,14 @@ func (msg *SetCommand) Type() byte {
 	return core.CMD_SET
 }
 
-func (msg *SetCommand) Execute(c cache.Cacher) ([]byte, error) {
+func (msg *SetCommand) Execute(c cache.ICache) []byte {
 	err := c.Set(msg.Key, msg.Value, msg.TTL)
 	if err != nil {
-		return nil, err
+		log.Println(err.Error())
+		return []byte{core.CMD_EXEC_FAILED}
 	}
 
-	return []byte("OK"), nil
+	return []byte{core.CMD_EXEC_SUCCEEDED}
 }
 
 func (msg *SetCommand) ModifiesCache() bool {

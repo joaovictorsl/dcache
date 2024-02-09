@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/joaovictorsl/dcache/core"
 	"github.com/joaovictorsl/dcache/core/cache"
@@ -19,13 +20,14 @@ func (msg *DeleteCommand) Type() byte {
 	return core.CMD_DELETE
 }
 
-func (msg *DeleteCommand) Execute(c cache.Cacher) ([]byte, error) {
+func (msg *DeleteCommand) Execute(c cache.ICache) []byte {
 	err := c.Delete(msg.Key)
 	if err != nil {
-		return nil, err
+		log.Println(err.Error())
+		return []byte{core.CMD_EXEC_FAILED}
 	}
 
-	return []byte("DELETED"), nil
+	return []byte{core.CMD_EXEC_SUCCEEDED}
 }
 
 func (msg *DeleteCommand) ModifiesCache() bool {

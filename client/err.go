@@ -1,13 +1,16 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	NOT_ACTIVE_CONN = iota
 	CONN_ERROR
 	FAILED_TO_CONNECT
 	TERMINATED_CLIENT
-	KEY_NOT_FOUND
+	CONN_NOT_FOUND
+	CMD_FAILED
 )
 
 type DCacheError struct {
@@ -43,10 +46,21 @@ func dCacheTerminatedClientError() *DCacheError {
 	}
 }
 
-func dCacheKeyNotFoundError(key string) *DCacheError {
+func dCacheConnNotFoundError(key string) *DCacheError {
 	return &DCacheError{
 		msg:  fmt.Sprintf("key (%s) was not found", key),
-		code: KEY_NOT_FOUND,
+		code: CONN_NOT_FOUND,
+	}
+}
+
+func dCacheSetCmdFailedError(key string) *DCacheError {
+	return dCacheCmdFailedError("set", key)
+}
+
+func dCacheCmdFailedError(cmd, key string) *DCacheError {
+	return &DCacheError{
+		msg:  fmt.Sprintf("%s command on key %s failed", cmd, key),
+		code: CMD_FAILED,
 	}
 }
 

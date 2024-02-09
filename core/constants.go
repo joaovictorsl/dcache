@@ -6,6 +6,10 @@ const (
 	CMD_HAS
 	CMD_DELETE
 
+	CMD_EXEC_SUCCEEDED
+	CMD_EXEC_FAILED
+	INVALID_COMMAND_CODE
+
 	INVALID_COMMAND        string = "invalid command"
 	INVALID_GET_COMMAND    string = "invalid GET command"
 	INVALID_SET_COMMAND    string = "invalid SET command"

@@ -95,16 +95,16 @@ func TestCommands(t *testing.T) {
 		k := cases[i]
 		v := cases[i+1]
 
-		res, err := client.Set(string(k), v, 10000)
+		err := client.Set(string(k), v, 10000)
 		if err != nil {
 			t.Errorf("no error was expected on SET operation, but got: %s", err)
-		} else if !bytes.Equal(res, []byte("OK")) {
-			t.Errorf("expected SET command to return OK but got: %v | %s", res, string(res))
 		}
 
-		res, err = client.Get(string(k))
+		res, ok, err := client.Get(string(k))
 		if err != nil {
 			t.Errorf("no error was expected on GET operation, but got: %s", err)
+		} else if !ok {
+			t.Errorf("expected key %s to be found, but wasn't", string(k))
 		} else if !bytes.Equal(res, v) {
 			t.Errorf("expected GET command on %s key to return %s but got: %v | %s", string(k), string(v), res, string(res))
 		}
