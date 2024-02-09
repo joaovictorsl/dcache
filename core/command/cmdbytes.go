@@ -1,4 +1,4 @@
-package protocol
+package command
 
 import (
 	"encoding/binary"
@@ -6,7 +6,7 @@ import (
 	"github.com/joaovictorsl/dcache/core"
 )
 
-func CreateSetCmd(k string, v []byte, ttl uint32) []byte {
+func SetCmdAsBytes(k string, v []byte, ttl uint32) []byte {
 	cmd := make([]byte, 2+len(k)+1+len(v))
 	cmd[0] = core.CMD_SET
 	cmd[1] = byte(len(k))
@@ -16,19 +16,19 @@ func CreateSetCmd(k string, v []byte, ttl uint32) []byte {
 	return binary.LittleEndian.AppendUint32(cmd, ttl)
 }
 
-func CreateDeleteCmd(k string) []byte {
-	return createKeyOnlyCmd(core.CMD_DELETE, k)
+func DeleteCmdAsBytes(k string) []byte {
+	return keyOnlyCmdAsBytes(core.CMD_DELETE, k)
 }
 
-func CreateGetCmd(k string) []byte {
-	return createKeyOnlyCmd(core.CMD_GET, k)
+func GetCmdAsBytes(k string) []byte {
+	return keyOnlyCmdAsBytes(core.CMD_GET, k)
 }
 
-func CreateHasCmd(k string) []byte {
-	return createKeyOnlyCmd(core.CMD_HAS, k)
+func HasCmdAsBytes(k string) []byte {
+	return keyOnlyCmdAsBytes(core.CMD_HAS, k)
 }
 
-func createKeyOnlyCmd(cmdType byte, k string) []byte {
+func keyOnlyCmdAsBytes(cmdType byte, k string) []byte {
 	cmd := make([]byte, 2+len(k))
 	cmd[0] = cmdType
 	cmd[1] = byte(len(k))

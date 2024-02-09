@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/joaovictorsl/dcache/client/ring"
-	"github.com/joaovictorsl/dcache/core/protocol"
+	"github.com/joaovictorsl/dcache/core/command"
 )
 
 // Client used to communicate to DCache nodes.
@@ -91,22 +91,22 @@ func (c *DCacheClient) Connect(retries uint, retryInterval time.Duration) *DCach
 }
 
 func (c *DCacheClient) Set(key string, value []byte, ttl uint32) ([]byte, *DCacheError) {
-	cmd := protocol.CreateSetCmd(key, value, ttl)
+	cmd := command.SetCmdAsBytes(key, value, ttl)
 	return c.execCmd(cmd, key)
 }
 
 func (c *DCacheClient) Get(key string) ([]byte, *DCacheError) {
-	cmd := protocol.CreateGetCmd(key)
+	cmd := command.GetCmdAsBytes(key)
 	return c.execCmd(cmd, key)
 }
 
 func (c *DCacheClient) Delete(key string) ([]byte, *DCacheError) {
-	cmd := protocol.CreateDeleteCmd(key)
+	cmd := command.DeleteCmdAsBytes(key)
 	return c.execCmd(cmd, key)
 }
 
 func (c *DCacheClient) Has(key string) ([]byte, *DCacheError) {
-	cmd := protocol.CreateHasCmd(key)
+	cmd := command.HasCmdAsBytes(key)
 	return c.execCmd(cmd, key)
 }
 
