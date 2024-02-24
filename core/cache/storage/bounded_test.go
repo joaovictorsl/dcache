@@ -34,8 +34,8 @@ func TestOverall(t *testing.T) {
 
 	key := "foo"
 	value := "bar"
-	ok := storage.Put(key, []byte(value))
-	if !ok {
+	err := storage.Put(key, []byte(value))
+	if err != nil {
 		t.Error("expected put to succeed, but failed")
 	}
 
@@ -49,10 +49,7 @@ func TestOverall(t *testing.T) {
 		t.Errorf("expected get on key %s to be: %s, but was: %s", key, value, string(v))
 	}
 
-	if ok := storage.Remove(key); !ok {
-		t.Error("expected remove to succeed, but failed")
-	}
-
+	storage.Remove(key)
 	if storage.Size() != 0 {
 		t.Errorf("expected storage to be empty, but got %v", storage.Size())
 	}
@@ -66,7 +63,7 @@ func TestFull(t *testing.T) {
 		storage.Put(key, []byte(value))
 	}
 
-	if ok := storage.Put(key, []byte(value)); !ok {
+	if err := storage.Put(key, []byte(value)); err != nil {
 		t.Error("expected put to succeed, since  all keys were equal it should not be full")
 	} else if storage.Size() != 1 {
 		t.Errorf("expected size to be 1, was: %v", storage.Size())
@@ -78,15 +75,15 @@ func TestFull(t *testing.T) {
 		storage.Put(key+strconv.FormatInt(int64(i), 10), v)
 	}
 
-	if ok := storage.Put(key+"last", []byte(value)); ok {
+	if err := storage.Put(key+"last", []byte(value)); err == nil {
 		t.Errorf("expected put to fail since storage should be full")
 	} else if storage.Size() != TEST_MIN_CAP {
 		t.Errorf("expected size to be %d, was: %d", TEST_MIN_CAP, storage.Size())
 	}
 
 	// Rewrite same key in different size bucket
-	ok := storage.Put(key, []byte("barbar"))
-	if !ok {
+	err := storage.Put(key, []byte("barbar"))
+	if err != nil {
 		t.Error("expected put to succeed since we are inserting in an empty size bucket")
 	} else if storage.Size() != TEST_MIN_CAP {
 		t.Errorf("same key in different size bucket should've been removed. Expected size to be %d, was: %d", TEST_MIN_CAP, storage.Size())
@@ -102,23 +99,20 @@ func TestFull(t *testing.T) {
 		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MAX_CAP, storage.sizeKeyIndexMap[TEST_MAX_SIZE+1].Size())
 	}
 
-	ok = storage.Put("foo", []byte("abcdefghijklmn"))
-	if ok {
+	err = storage.Put("foo", []byte("abcdefghijklmn"))
+	if err == nil {
 		t.Errorf("expected put to fail since 14 byte allocations are full")
 	}
 
-	ok = storage.Remove("focus")
-	if !ok {
-		t.Errorf("expected remove of key focus to succeed, it failed")
-	}
+	storage.Remove("focus")
 
-	ok = storage.Put("foo", []byte("abcdefghijklmn"))
-	if !ok {
+	err = storage.Put("foo", []byte("abcdefghijklmn"))
+	if err != nil {
 		t.Errorf("expected put of key foo in 14 byte allocations to succeed, but it failed")
 	}
 
-	ok = storage.Put("foo1", []byte("abcdefghi"))
-	if !ok {
+	err = storage.Put("foo1", []byte("abcdefghi"))
+	if err != nil {
 		t.Errorf("expected put of key foo1 in 9 byte allocations to succeed, but it failed")
 	}
 

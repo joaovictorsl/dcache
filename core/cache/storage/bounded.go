@@ -12,11 +12,12 @@ type BoundedStorage struct {
 	sizeKeyIndexMap map[int]*maps.OccupationMap[string, int]
 	data            []byte
 	sizes           []int
+	cap             int
 }
 
 func NewBoundedStorage(sizeAndCapMap map[int]int) *BoundedStorage {
 	if len(sizeAndCapMap) == 0 {
-		log.Fatal("Invalid args for new SimpleCache. sizes and cap must be equal in size and not be empty.")
+		log.Fatal("Invalid args for new BoundedStorage. sizeAndCapMap must not be empty.")
 	}
 
 	// Calc total size and amount of possible keys
@@ -51,14 +52,14 @@ func NewBoundedStorage(sizeAndCapMap map[int]int) *BoundedStorage {
 		sizeKeyIndexMap: skiMap,
 		sizes:           sizes,
 		data:            make([]byte, totalSize),
+		cap:             totalCap,
 	}
 
 	return bs
 }
 
-func (bs *BoundedStorage) Put(k string, v []byte) (ok bool) {
-	bucket := -1
-	prevBucket := -1
+func (bs *BoundedStorage) Put(k string, v []byte) (err error) {
+	bucket, prevBucket := -1, -1
 	for _, s := range bs.sizes {
 		_, ok := bs.sizeKeyIndexMap[s].Get(k)
 		if ok {
@@ -73,12 +74,12 @@ func (bs *BoundedStorage) Put(k string, v []byte) (ok bool) {
 
 	if bucket == -1 {
 		// Key doesn't fit in any bucket
-		return false
+		return fmt.Errorf("key doesn't fit in any bucket")
 	}
 
 	p, ok := bs.sizeKeyIndexMap[bucket].Occupy(string(k))
 	if !ok {
-		return false
+		return fmt.Errorf("cache is full")
 	}
 
 	bs.data[p] = byte(len(v))
@@ -90,7 +91,7 @@ func (bs *BoundedStorage) Put(k string, v []byte) (ok bool) {
 		bs.sizeKeyIndexMap[prevBucket].Free(k)
 	}
 
-	return true
+	return nil
 }
 
 func (bs *BoundedStorage) Get(k string) (v []byte, ok bool) {
@@ -103,14 +104,11 @@ func (bs *BoundedStorage) Get(k string) (v []byte, ok bool) {
 	return nil, false
 }
 
-func (bs *BoundedStorage) Remove(k string) (ok bool) {
-	_, size, err := bs.index(k)
-	if err != nil {
-		return false
+func (bs *BoundedStorage) Remove(k string) {
+	_, size, found := bs.index(k)
+	if found {
+		bs.sizeKeyIndexMap[size].Free(string(k))
 	}
-
-	bs.sizeKeyIndexMap[size].Free(string(k))
-	return true
 }
 
 func (bs *BoundedStorage) Size() int {
@@ -122,12 +120,20 @@ func (bs *BoundedStorage) Size() int {
 	return currSize
 }
 
-func (bs *BoundedStorage) index(k string) (idx int, size int, err error) {
+func (bs *BoundedStorage) Capacity() int {
+	return bs.cap
+}
+
+// Searches for a key in data on O(N), N is the amount of different sizes.
+//
+// Returns the index of the key's value in the data array, the value's size
+// and a boolean indicating wether it was found or not.
+func (bs *BoundedStorage) index(k string) (idx int, size int, found bool) {
 	for size, om := range bs.sizeKeyIndexMap {
 		if v, ok := om.Get(k); ok {
-			return v, size, nil
+			return v, size, true
 		}
 	}
 
-	return 0, 0, fmt.Errorf("key (%s) not found", k)
+	return 0, 0, false
 }
