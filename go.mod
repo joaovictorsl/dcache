@@ -4,6 +4,8 @@ go 1.20
 
 require golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
 
+replace github.com/joaovictorsl/gollections => /home/jvsl/go/src/gollections
+
 require (
 	github.com/joaovictorsl/gollections v0.0.0-20240201023130-6e992f38e3d9
 	github.com/stretchr/testify v1.8.4

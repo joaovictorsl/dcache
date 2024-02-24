@@ -8,15 +8,15 @@ import (
 	"github.com/joaovictorsl/dcache/core/cache/storage"
 )
 
-// Does not sync across nodes
+// A cache which does no eviction and has no expiration.
 type SimpleCache struct {
 	lock    *sync.RWMutex
 	storage storage.Storage
 }
 
-// Creates a SimpleCache and allocs sizes[i] * cap[i] bytes.
-//
-// Total size of memory allocated is given by the sum of sizes[i] * cap[i] for i in range [0, len(sizes) - 1]
+/*
+Creates a bounded SimpleCache, see BoundedStorage in [dcache.core.cache.storage] for more info on allocated bytes.
+*/
 func NewSimpleBounded(sizeAndCapMap map[int]int) *SimpleCache {
 	return &SimpleCache{
 		lock:    &sync.RWMutex{},
@@ -24,7 +24,7 @@ func NewSimpleBounded(sizeAndCapMap map[int]int) *SimpleCache {
 	}
 }
 
-// Creates a SimpleCache with unbounded storage.
+// Creates a unbounded SimpleCache.
 func NewSimple() *SimpleCache {
 	return &SimpleCache{
 		lock:    &sync.RWMutex{},
@@ -40,8 +40,8 @@ func (c *SimpleCache) Set(k string, v []byte, ttl time.Duration) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if ok := c.storage.Put(k, v); !ok {
-		return fmt.Errorf("failed to put key storage is full")
+	if err := c.storage.Put(k, v); err != nil {
+		return err
 	}
 
 	return nil
@@ -71,9 +71,7 @@ func (c *SimpleCache) Delete(k string) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if ok := c.storage.Remove(k); !ok {
-		return fmt.Errorf("something went wrong deleting key (%s) not found", k)
-	}
+	c.storage.Remove(k)
 
 	return nil
 }

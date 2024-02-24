@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joaovictorsl/dcache/core/cache/evict"
 	"github.com/joaovictorsl/dcache/core/cache/storage"
 )
 
@@ -13,13 +14,16 @@ type CleanIntervalCache struct {
 	storage       storage.Storage
 	keyExpMap     map[string]time.Time
 	cleanInterval time.Duration
+	policy        evict.EvictionPolicy[string]
 }
 
-func NewCleanIntervalBounded(cleanInterval time.Duration, sizeAndCapMap map[int]int) *CleanIntervalCache {
+func NewCleanIntervalBounded(cleanInterval time.Duration, sizeAndCapMap map[int]int, createPolicy func(capacity int) evict.EvictionPolicy[string]) *CleanIntervalCache {
+	s := storage.NewBoundedStorage(sizeAndCapMap)
 	c := &CleanIntervalCache{
-		storage:       storage.NewBoundedStorage(sizeAndCapMap),
+		storage:       s,
 		cleanInterval: cleanInterval,
 		keyExpMap:     make(map[string]time.Time),
+		policy:        createPolicy(s.Capacity()),
 	}
 
 	go c.startCleaner()
@@ -32,6 +36,7 @@ func NewCleanInterval(cleanInterval time.Duration) *CleanIntervalCache {
 		storage:       storage.NewUnboundedStorage(),
 		cleanInterval: cleanInterval,
 		keyExpMap:     make(map[string]time.Time),
+		policy:        &evict.NoPolicy[string]{},
 	}
 
 	go c.startCleaner()
@@ -49,6 +54,7 @@ func (c *CleanIntervalCache) startCleaner() {
 			if time.Now().After(exp) {
 				delete(c.keyExpMap, k)
 				c.storage.Remove(k)
+				c.policy.Remove(k)
 			}
 		}
 
@@ -64,10 +70,15 @@ func (c *CleanIntervalCache) Set(k string, v []byte, ttl time.Duration) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
+	evictedKey, eviction := c.policy.RecordAccess(k)
+	if eviction {
+		c.storage.Remove(evictedKey)
+	}
+
 	exp := time.Now().Add(ttl)
 	c.keyExpMap[k] = exp
-	if ok := c.storage.Put(k, v); !ok {
-		return fmt.Errorf("failed to set key (%s)", k)
+	if err := c.storage.Put(k, v); err != nil {
+		return err
 	}
 
 	return nil
@@ -94,6 +105,11 @@ func (c *CleanIntervalCache) Get(k string) ([]byte, error) {
 		return nil, fmt.Errorf("key (%s) not found", k)
 	}
 
+	evictedKey, eviction := c.policy.RecordAccess(k)
+	if eviction {
+		c.storage.Remove(evictedKey)
+	}
+
 	return data, nil
 }
 
@@ -103,6 +119,7 @@ func (c *CleanIntervalCache) Delete(k string) error {
 
 	delete(c.keyExpMap, k)
 	c.storage.Remove(k)
+	c.policy.Remove(k)
 
 	return nil
 }
