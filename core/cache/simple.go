@@ -67,11 +67,9 @@ func (c *SimpleCache) Get(k string) (v []byte, err error) {
 	return v, nil
 }
 
-func (c *SimpleCache) Delete(k string) error {
+func (c *SimpleCache) Delete(k string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	c.storage.Remove(k)
-
-	return nil
 }

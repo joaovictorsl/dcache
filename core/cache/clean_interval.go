@@ -113,13 +113,11 @@ func (c *CleanIntervalCache) Get(k string) ([]byte, error) {
 	return data, nil
 }
 
-func (c *CleanIntervalCache) Delete(k string) error {
+func (c *CleanIntervalCache) Delete(k string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	delete(c.keyExpMap, k)
 	c.storage.Remove(k)
 	c.policy.Remove(k)
-
-	return nil
 }
