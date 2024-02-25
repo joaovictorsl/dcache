@@ -15,23 +15,23 @@ func extractSetArgs(raw []byte) (k, v []byte, ttl int, err error) {
 		return nil, nil, 0, fmt.Errorf(core.INVALID_SET_COMMAND)
 	}
 
-	kLen := raw[1]
+	kLen := uint32(raw[1])
 	if rawLen < 2+int(kLen)+1 {
 		// Should have first byte, key length byte, all key bytes and value length byte
 		return nil, nil, 0, fmt.Errorf(core.INVALID_SET_COMMAND)
 	}
 
-	vLen := raw[2+kLen]
-	if rawLen != 2+int(kLen)+1+int(vLen)+4 {
-		// Should have first byte, key length byte, all key bytes, value length byte,
+	vLen := binary.LittleEndian.Uint32(raw[2+kLen : 6+kLen])
+	if rawLen != 2+int(kLen)+4+int(vLen)+4 {
+		// Should have first byte, key length byte, all key bytes, four value length bytes,
 		// all value bytes and 4 bytes for the uint32 ttl
 		return nil, nil, 0, fmt.Errorf(core.INVALID_SET_COMMAND)
 	}
 
-	ttlBytes := raw[3+kLen+vLen : 3+kLen+vLen+8]
+	ttlBytes := raw[6+kLen+vLen : 6+kLen+vLen+4]
 
 	k = raw[2 : 2+kLen]
-	v = raw[3+kLen : 3+kLen+vLen]
+	v = raw[6+kLen : 6+kLen+vLen]
 	ttl = int(binary.LittleEndian.Uint32(ttlBytes))
 
 	return k, v, ttl, nil
