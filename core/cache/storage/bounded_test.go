@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	TEST_MIN_SIZE = 4
-	TEST_MED_SIZE = 9
-	TEST_MAX_SIZE = 14
+	TEST_MIN_SIZE = 5
+	TEST_MED_SIZE = 10
+	TEST_MAX_SIZE = 15
 	TEST_MIN_CAP  = 3
 	TEST_MED_CAP  = 2
 	TEST_MAX_CAP  = 1
@@ -69,62 +69,64 @@ func TestFull(t *testing.T) {
 		t.Errorf("expected size to be 1, was: %v", storage.Size())
 	}
 
-	for i := 1; i < TEST_MIN_CAP; i++ {
+	for i := 0; i < TEST_MIN_CAP-1; i++ {
 		v := []byte(value)
-		v = append(v, byte(i))
-		storage.Put(key+strconv.FormatInt(int64(i), 10), v)
+		v = append(v, byte(i+1))
+		storage.Put(key+strconv.FormatInt(int64(i+1), 10), v)
 	}
 
-	if err := storage.Put(key+"last", []byte(value)); err == nil {
-		t.Errorf("expected put to fail since storage should be full")
-	} else if storage.Size() != TEST_MIN_CAP {
-		t.Errorf("expected size to be %d, was: %d", TEST_MIN_CAP, storage.Size())
+	if err := storage.Put(key+"last", []byte(value)); err != nil {
+		t.Errorf("expected put to succeed since it would store in a different size bucket, but failed")
+	} else if storage.Size() != TEST_MIN_CAP+1 {
+		t.Errorf("expected size to be %d, was: %d", TEST_MIN_CAP+1, storage.Size())
+	} else if storage.keyToBucketMap[key+"last"] != TEST_MED_SIZE+4 /*This +4 is accounting for the four bytes for the value length*/ {
+		t.Errorf("expected key to be in bucket %d, was in: %d", TEST_MED_SIZE+4, storage.keyToBucketMap[key+"last"])
 	}
 
 	// Rewrite same key in different size bucket
 	err := storage.Put(key, []byte("barbar"))
 	if err != nil {
-		t.Error("expected put to succeed since we are inserting in an empty size bucket")
-	} else if storage.Size() != TEST_MIN_CAP {
-		t.Errorf("same key in different size bucket should've been removed. Expected size to be %d, was: %d", TEST_MIN_CAP, storage.Size())
+		t.Error("expected put to succeed since we are inserting in another bucket")
+	} else if storage.Size() != TEST_MIN_CAP+1 {
+		t.Errorf("same key in different size bucket should've been removed. Expected size to be %d, was: %d", TEST_MIN_CAP+1, storage.Size())
 	}
 
 	storage.Put("focus", []byte("abcdefghijklmn"))
 
-	if storage.sizeKeyIndexMap[TEST_MIN_SIZE+1].Size() != TEST_MIN_CAP-1 {
-		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MIN_CAP-1, storage.sizeKeyIndexMap[TEST_MIN_SIZE+1].Size())
-	} else if storage.sizeKeyIndexMap[TEST_MED_SIZE+1].Size() != TEST_MED_CAP-1 {
-		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MED_CAP-1, storage.sizeKeyIndexMap[TEST_MED_SIZE+1].Size())
-	} else if storage.sizeKeyIndexMap[TEST_MAX_SIZE+1].Size() != TEST_MAX_CAP {
-		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MAX_CAP, storage.sizeKeyIndexMap[TEST_MAX_SIZE+1].Size())
+	if storage.bucketToIndexMap[TEST_MIN_SIZE+4].Size() != TEST_MIN_CAP-1 {
+		t.Errorf("expected min bucket size to be %d, was: %d", TEST_MIN_CAP-1, storage.bucketToIndexMap[TEST_MIN_SIZE+4].Size())
+	} else if storage.bucketToIndexMap[TEST_MED_SIZE+4].Size() != TEST_MED_CAP {
+		t.Errorf("expected med bucket size to be full (%d), was: %d", TEST_MED_CAP, storage.bucketToIndexMap[TEST_MED_SIZE+4].Size())
+	} else if storage.bucketToIndexMap[TEST_MAX_SIZE+4].Size() != TEST_MAX_CAP {
+		t.Errorf("expected max bucket size to be full (%d), was: %d", TEST_MAX_CAP, storage.bucketToIndexMap[TEST_MAX_SIZE+4].Size())
 	}
 
 	err = storage.Put("foo", []byte("abcdefghijklmn"))
 	if err == nil {
-		t.Errorf("expected put to fail since 14 byte allocations are full")
+		t.Errorf("expected put to fail since MAX_CAP bucket is full")
 	}
 
 	storage.Remove("focus")
 
 	err = storage.Put("foo", []byte("abcdefghijklmn"))
 	if err != nil {
-		t.Errorf("expected put of key foo in 14 byte allocations to succeed, but it failed")
+		t.Errorf("expected put of key foo in MAX_CAP bucket to succeed, but it failed")
 	}
 
 	err = storage.Put("foo1", []byte("abcdefghi"))
 	if err != nil {
-		t.Errorf("expected put of key foo1 in 9 byte allocations to succeed, but it failed")
+		t.Errorf("expected put of key foo1 in MED_CAP bucket to succeed, but it failed")
 	}
 
-	if storage.sizeKeyIndexMap[TEST_MIN_SIZE+1].Size() != TEST_MIN_CAP-2 {
-		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MIN_CAP-2, storage.sizeKeyIndexMap[TEST_MIN_SIZE+1].Size())
-	} else if storage.sizeKeyIndexMap[TEST_MED_SIZE+1].Size() != TEST_MED_CAP-1 {
-		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MED_CAP-1, storage.sizeKeyIndexMap[TEST_MED_SIZE+1].Size())
-	} else if storage.sizeKeyIndexMap[TEST_MAX_SIZE+1].Size() != TEST_MAX_CAP {
-		t.Errorf("expected min size allocated mem to be full, expected %d, was: %d", TEST_MAX_CAP, storage.sizeKeyIndexMap[TEST_MAX_SIZE+1].Size())
+	if storage.bucketToIndexMap[TEST_MIN_SIZE+4].Size() != TEST_MIN_CAP-2 {
+		t.Errorf("expected min bucket size to be %d, was: %d", TEST_MIN_CAP-2, storage.bucketToIndexMap[TEST_MIN_SIZE+4].Size())
+	} else if storage.bucketToIndexMap[TEST_MED_SIZE+4].Size() != TEST_MED_CAP {
+		t.Errorf("expected min bucket size to be full (%d), was: %d", TEST_MED_CAP, storage.bucketToIndexMap[TEST_MED_SIZE+4].Size())
+	} else if storage.bucketToIndexMap[TEST_MAX_SIZE+4].Size() != TEST_MAX_CAP {
+		t.Errorf("expected min bucket size to be full (%d), was: %d", TEST_MAX_CAP, storage.bucketToIndexMap[TEST_MAX_SIZE+4].Size())
 	}
 
-	if v, ok := storage.Get("foo"); !ok {
+	if v, ok := storage.Get(key); !ok {
 		t.Errorf("expected to find foo key in storage, but didn't")
 	} else if string(v) != "abcdefghijklmn" {
 		t.Errorf("expected value of key foo to be %s, but was %s", "abcdefghijklmn", string(v))
