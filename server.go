@@ -61,7 +61,6 @@ func (s *Server) handleConn(conn net.Conn) {
 func (s *Server) handleCommand(conn net.Conn, rawCmd []byte) {
 	cmd, err := protocol.ParseCommand(rawCmd)
 	if err != nil {
-		log.Println(err.Error())
 		conn.Write([]byte{core.INVALID_COMMAND_CODE})
 		return
 	}

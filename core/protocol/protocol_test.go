@@ -37,7 +37,7 @@ func TestParseCommandSet(t *testing.T) {
 		cmdInvalidKeySizeOver := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)
 		cmdInvalidKeySizeOver[1] = 4
 		_, err := ParseCommand(cmdInvalidKeySizeOver)
-		expected := core.INVALID_SET_COMMAND
+		expected := core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeOver)
 		}
@@ -49,7 +49,7 @@ func TestParseCommandSet(t *testing.T) {
 		cmdInvalidKeySizeUnder := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)
 		cmdInvalidKeySizeUnder[1] = 2
 		_, err = ParseCommand(cmdInvalidKeySizeUnder)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeUnder)
 		}
@@ -61,7 +61,7 @@ func TestParseCommandSet(t *testing.T) {
 		cmdInvalidValueSizeOver := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)
 		cmdInvalidValueSizeOver[5] = 4
 		_, err = ParseCommand(cmdInvalidValueSizeOver)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidValueSizeOver)
 		}
@@ -73,7 +73,7 @@ func TestParseCommandSet(t *testing.T) {
 		cmdInvalidValueSizeUnder := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)
 		cmdInvalidValueSizeUnder[5] = 2
 		_, err = ParseCommand(cmdInvalidValueSizeUnder)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidValueSizeUnder)
 		}
@@ -95,7 +95,7 @@ func TestParseCommandSet(t *testing.T) {
 
 		cmdOnlyKey := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)[0:5]
 		_, err = ParseCommand(cmdOnlyKey)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdOnlyKey)
 		}
@@ -106,7 +106,7 @@ func TestParseCommandSet(t *testing.T) {
 
 		cmdOnlyMissingTtl := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)[0:9]
 		_, err = ParseCommand(cmdOnlyMissingTtl)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdOnlyMissingTtl)
 		}
@@ -117,7 +117,7 @@ func TestParseCommandSet(t *testing.T) {
 
 		cmdInvalidOneByte := []byte{core.CMD_SET}
 		_, err = ParseCommand(cmdInvalidOneByte)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidOneByte)
 		}
@@ -129,7 +129,7 @@ func TestParseCommandSet(t *testing.T) {
 		cmdKeyLen0 := command.SetCmdAsBytes("Foo", []byte("Bar"), 5000)
 		cmdKeyLen0[1] = 0
 		_, err = ParseCommand(cmdKeyLen0)
-		expected = core.INVALID_SET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdKeyLen0)
 		}
@@ -164,7 +164,7 @@ func TestParseCommandDelete(t *testing.T) {
 	t.Run("should return an error if command is invalid", func(t *testing.T) {
 		cmdInvalidOneByte := []byte{core.CMD_DELETE}
 		_, err := ParseCommand(cmdInvalidOneByte)
-		expected := core.INVALID_DELETE_COMMAND
+		expected := core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidOneByte)
 		}
@@ -175,7 +175,7 @@ func TestParseCommandDelete(t *testing.T) {
 
 		cmdInvalidNoKey := []byte{core.CMD_DELETE, 2}
 		_, err = ParseCommand(cmdInvalidNoKey)
-		expected = core.INVALID_DELETE_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidNoKey)
 		}
@@ -187,7 +187,7 @@ func TestParseCommandDelete(t *testing.T) {
 		cmdInvalidKeySizeOver := command.DeleteCmdAsBytes("Foo")
 		cmdInvalidKeySizeOver[1] = 4
 		_, err = ParseCommand(cmdInvalidKeySizeOver)
-		expected = core.INVALID_DELETE_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeOver)
 		}
@@ -199,7 +199,7 @@ func TestParseCommandDelete(t *testing.T) {
 		cmdInvalidKeySizeUnder := command.DeleteCmdAsBytes("Foo")
 		cmdInvalidKeySizeUnder[1] = 2
 		_, err = ParseCommand(cmdInvalidKeySizeUnder)
-		expected = core.INVALID_DELETE_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeUnder)
 		}
@@ -222,7 +222,7 @@ func TestParseCommandDelete(t *testing.T) {
 		cmdKeyLen0 := command.DeleteCmdAsBytes("Foo")
 		cmdKeyLen0[1] = 0
 		_, err = ParseCommand(cmdKeyLen0)
-		expected = core.INVALID_DELETE_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdKeyLen0)
 		}
@@ -257,7 +257,7 @@ func TestParseCommandGet(t *testing.T) {
 	t.Run("should return an error if command is invalid", func(t *testing.T) {
 		cmdInvalidOneByte := []byte{core.CMD_GET}
 		_, err := ParseCommand(cmdInvalidOneByte)
-		expected := core.INVALID_GET_COMMAND
+		expected := core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidOneByte)
 		}
@@ -268,7 +268,7 @@ func TestParseCommandGet(t *testing.T) {
 
 		cmdInvalidNoKey := []byte{core.CMD_GET, 2}
 		_, err = ParseCommand(cmdInvalidNoKey)
-		expected = core.INVALID_GET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidNoKey)
 		}
@@ -280,7 +280,7 @@ func TestParseCommandGet(t *testing.T) {
 		cmdInvalidKeySizeOver := command.GetCmdAsBytes("Foo")
 		cmdInvalidKeySizeOver[1] = 4
 		_, err = ParseCommand(cmdInvalidKeySizeOver)
-		expected = core.INVALID_GET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeOver)
 		}
@@ -292,7 +292,7 @@ func TestParseCommandGet(t *testing.T) {
 		cmdInvalidKeySizeUnder := command.GetCmdAsBytes("Foo")
 		cmdInvalidKeySizeUnder[1] = 2
 		_, err = ParseCommand(cmdInvalidKeySizeUnder)
-		expected = core.INVALID_GET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeUnder)
 		}
@@ -315,7 +315,7 @@ func TestParseCommandGet(t *testing.T) {
 		cmdKeyLen0 := command.GetCmdAsBytes("Foo")
 		cmdKeyLen0[1] = 0
 		_, err = ParseCommand(cmdKeyLen0)
-		expected = core.INVALID_GET_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdKeyLen0)
 		}
@@ -349,7 +349,7 @@ func TestParseCommandHas(t *testing.T) {
 	t.Run("should return an error if command is invalid", func(t *testing.T) {
 		cmdInvalidOneByte := []byte{core.CMD_HAS}
 		_, err := ParseCommand(cmdInvalidOneByte)
-		expected := core.INVALID_HAS_COMMAND
+		expected := core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidOneByte)
 		}
@@ -360,7 +360,7 @@ func TestParseCommandHas(t *testing.T) {
 
 		cmdInvalidNoKey := []byte{core.CMD_HAS, 2}
 		_, err = ParseCommand(cmdInvalidNoKey)
-		expected = core.INVALID_HAS_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidNoKey)
 		}
@@ -372,7 +372,7 @@ func TestParseCommandHas(t *testing.T) {
 		cmdInvalidKeySizeOver := command.HasCmdAsBytes("Foo")
 		cmdInvalidKeySizeOver[1] = 4
 		_, err = ParseCommand(cmdInvalidKeySizeOver)
-		expected = core.INVALID_HAS_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeOver)
 		}
@@ -384,7 +384,7 @@ func TestParseCommandHas(t *testing.T) {
 		cmdInvalidKeySizeUnder := command.HasCmdAsBytes("Foo")
 		cmdInvalidKeySizeUnder[1] = 2
 		_, err = ParseCommand(cmdInvalidKeySizeUnder)
-		expected = core.INVALID_HAS_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdInvalidKeySizeUnder)
 		}
@@ -407,7 +407,7 @@ func TestParseCommandHas(t *testing.T) {
 		cmdKeyLen0 := command.HasCmdAsBytes("Foo")
 		cmdKeyLen0[1] = 0
 		_, err = ParseCommand(cmdKeyLen0)
-		expected = core.INVALID_HAS_COMMAND
+		expected = core.INVALID_COMMAND
 		if err == nil {
 			t.Errorf("parseCommand(%q) should return error", cmdKeyLen0)
 		}

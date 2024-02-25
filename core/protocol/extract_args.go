@@ -7,25 +7,25 @@ import (
 	"github.com/joaovictorsl/dcache/core"
 )
 
-// Extracts Set command args, if something is wrong throws core.INVALID_SET_COMMAND
+// Extracts Set command args, if something is wrong throws core.INVALID_COMMAND
 func extractSetArgs(raw []byte) (k, v []byte, ttl int, err error) {
 	rawLen := len(raw)
 	if rawLen < 3 {
 		// Should have first byte, key length byte and some byte that would belong to the key
-		return nil, nil, 0, fmt.Errorf(core.INVALID_SET_COMMAND)
+		return nil, nil, 0, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	kLen := uint32(raw[1])
 	if rawLen < 2+int(kLen)+1 {
 		// Should have first byte, key length byte, all key bytes and value length byte
-		return nil, nil, 0, fmt.Errorf(core.INVALID_SET_COMMAND)
+		return nil, nil, 0, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	vLen := binary.LittleEndian.Uint32(raw[2+kLen : 6+kLen])
 	if rawLen != 2+int(kLen)+4+int(vLen)+4 {
 		// Should have first byte, key length byte, all key bytes, four value length bytes,
 		// all value bytes and 4 bytes for the uint32 ttl
-		return nil, nil, 0, fmt.Errorf(core.INVALID_SET_COMMAND)
+		return nil, nil, 0, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	ttlBytes := raw[6+kLen+vLen : 6+kLen+vLen+4]
@@ -37,52 +37,52 @@ func extractSetArgs(raw []byte) (k, v []byte, ttl int, err error) {
 	return k, v, ttl, nil
 }
 
-// Extracts Get command args, if something is wrong throws core.INVALID_GET_COMMAND
+// Extracts Get command args, if something is wrong throws core.INVALID_COMMAND
 func extractGetArgs(raw []byte) (k []byte, err error) {
 	rawLen := len(raw)
 	if rawLen < 3 {
 		// Should have first byte, key length byte and some byte that would belong to the key
-		return nil, fmt.Errorf(core.INVALID_GET_COMMAND)
+		return nil, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	kLen := raw[1]
 	if rawLen != 2+int(kLen) {
 		// Should have first byte, key length byte and all key bytes
-		return nil, fmt.Errorf(core.INVALID_GET_COMMAND)
+		return nil, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	return raw[2 : 2+kLen], nil
 }
 
-// Extracts Has command args, if something is wrong throws core.INVALID_HAS_COMMAND
+// Extracts Has command args, if something is wrong throws core.INVALID__COMMAND
 func extractHasArgs(raw []byte) (k []byte, err error) {
 	rawLen := len(raw)
 	if rawLen < 3 {
 		// Should have first byte, key length byte and some byte that would belong to the key
-		return nil, fmt.Errorf(core.INVALID_HAS_COMMAND)
+		return nil, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	kLen := raw[1]
 	if rawLen != 2+int(kLen) {
 		// Should have first byte, key length byte and all key bytes
-		return nil, fmt.Errorf(core.INVALID_HAS_COMMAND)
+		return nil, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	return raw[2 : 2+kLen], nil
 }
 
-// Extracts Delete command args, if something is wrong throws core.INVALID_DELETE_COMMAND
+// Extracts Delete command args, if something is wrong throws core.INVALID__COMMAND
 func extractDeleteArgs(raw []byte) (k []byte, err error) {
 	rawLen := len(raw)
 	if rawLen < 3 {
 		// Should have first byte, key length byte and some byte that would belong to the key
-		return nil, fmt.Errorf(core.INVALID_DELETE_COMMAND)
+		return nil, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	kLen := raw[1]
 	if rawLen != 2+int(kLen) {
 		// Should have first byte, key length byte and all key bytes
-		return nil, fmt.Errorf(core.INVALID_DELETE_COMMAND)
+		return nil, fmt.Errorf(core.INVALID_COMMAND)
 	}
 
 	return raw[2 : 2+kLen], nil
