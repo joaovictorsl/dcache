@@ -24,7 +24,7 @@ var client *DCacheClient
 func TestMain(m *testing.M) {
 	addresses := []string{s1Addr, s2Addr, s3Addr, s4Addr, s5Addr}
 	for _, addr := range addresses {
-		s := dcache.NewServer(addr, cache.NewSimple())
+		s := dcache.NewServer(addr, cache.NewSimple(), 1000)
 		go s.Start()
 	}
 

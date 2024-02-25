@@ -11,14 +11,16 @@ import (
 )
 
 type Server struct {
-	cache cache.ICache
-	port  string
+	cache    cache.ICache
+	buffSize uint
+	port     string
 }
 
-func NewServer(port string, c cache.ICache) *Server {
+func NewServer(port string, c cache.ICache, maxValueLength uint) *Server {
 	return &Server{
-		cache: c,
-		port:  port,
+		cache:    c,
+		port:     port,
+		buffSize: 265 + maxValueLength,
 	}
 }
 
@@ -44,7 +46,7 @@ func (s *Server) Start() (err error) {
 func (s *Server) handleConn(conn net.Conn) {
 	defer conn.Close()
 
-	buf := make([]byte, 2048)
+	buf := make([]byte, s.buffSize)
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
