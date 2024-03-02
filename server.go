@@ -13,10 +13,10 @@ import (
 type Server struct {
 	cache    cache.ICache
 	buffSize uint
-	port     string
+	port     uint16
 }
 
-func NewServer(port string, c cache.ICache, maxValueLength uint) *Server {
+func NewServer(port uint16, c cache.ICache, maxValueLength uint) *Server {
 	return &Server{
 		cache:    c,
 		port:     port,
@@ -25,12 +25,12 @@ func NewServer(port string, c cache.ICache, maxValueLength uint) *Server {
 }
 
 func (s *Server) Start() (err error) {
-	ln, err := net.Listen("tcp", s.port)
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		return fmt.Errorf("listen error: %s", err)
 	}
 
-	log.Printf("server starting on port [%s]\n", s.port)
+	log.Printf("server starting on port [%d]\n", s.port)
 
 	for {
 		conn, err := ln.Accept()

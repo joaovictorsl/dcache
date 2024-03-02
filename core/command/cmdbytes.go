@@ -7,15 +7,14 @@ import (
 )
 
 func SetCmdAsBytes(k string, v []byte, ttl uint32) []byte {
-	cmd := make([]byte, 2+len(k)+4+len(v))
+	cmd := make([]byte, 2+len(k)+4+len(v)+4)
 	cmd[0] = core.CMD_SET
 	cmd[1] = byte(len(k))
-	valueLenArr := make([]byte, 4)
-	binary.LittleEndian.PutUint32(valueLenArr, uint32(len(v)))
 	copy(cmd[2:2+len(k)], k)
-	copy(cmd[2+len(k):6+len(k)], valueLenArr)
+	binary.LittleEndian.PutUint32(cmd[2+len(k):6+len(k)], uint32(len(v)))
 	copy(cmd[6+len(k):], v)
-	return binary.LittleEndian.AppendUint32(cmd, ttl)
+	binary.LittleEndian.PutUint32(cmd[6+len(k)+len(v):], ttl)
+	return cmd
 }
 
 func DeleteCmdAsBytes(k string) []byte {

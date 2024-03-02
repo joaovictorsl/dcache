@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/joaovictorsl/dcache/core"
 	"github.com/joaovictorsl/dcache/core/cache"
@@ -23,7 +22,6 @@ func (msg *GetCommand) Type() byte {
 func (msg *GetCommand) Execute(c cache.ICache) []byte {
 	v, err := c.Get(msg.Key)
 	if err != nil {
-		log.Println(err.Error())
 		return []byte{core.CMD_EXEC_FAILED}
 	}
 

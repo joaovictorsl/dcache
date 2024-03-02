@@ -12,6 +12,12 @@ import (
 )
 
 const (
+	s1Port uint16 = 3000
+	s2Port uint16 = 3001
+	s3Port uint16 = 3002
+	s4Port uint16 = 3003
+	s5Port uint16 = 3004
+
 	s1Addr = "127.0.0.1:3000"
 	s2Addr = "127.0.0.1:3001"
 	s3Addr = "127.0.0.1:3002"
@@ -22,9 +28,10 @@ const (
 var client *DCacheClient
 
 func TestMain(m *testing.M) {
+	ports := []uint16{s1Port, s2Port, s3Port, s4Port, s5Port}
 	addresses := []string{s1Addr, s2Addr, s3Addr, s4Addr, s5Addr}
-	for _, addr := range addresses {
-		s := dcache.NewServer(addr, cache.NewSimple(), 1000)
+	for _, port := range ports {
+		s := dcache.NewServer(port, cache.NewSimple(), 1000)
 		go s.Start()
 	}
 
