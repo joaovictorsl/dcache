@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/joaovictorsl/dcache/core"
-	"github.com/joaovictorsl/dcache/core/cache"
+	"github.com/joaovictorsl/fooche"
 )
 
 type DeleteCommand struct {
@@ -19,7 +19,7 @@ func (msg *DeleteCommand) Type() byte {
 	return core.CMD_DELETE
 }
 
-func (msg *DeleteCommand) Execute(c cache.ICache) []byte {
+func (msg *DeleteCommand) Execute(c fooche.ICache) []byte {
 	c.Delete(msg.Key)
 	return []byte{core.CMD_EXEC_SUCCEEDED}
 }

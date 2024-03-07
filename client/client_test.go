@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/joaovictorsl/dcache"
-	"github.com/joaovictorsl/dcache/core/cache"
+	"github.com/joaovictorsl/fooche"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 	ports := []uint16{s1Port, s2Port, s3Port, s4Port, s5Port}
 	addresses := []string{s1Addr, s2Addr, s3Addr, s4Addr, s5Addr}
 	for _, port := range ports {
-		s := dcache.NewServer(port, cache.NewSimple(), 1000)
+		s := dcache.NewServer(port, fooche.NewSimple(), 1000)
 		go s.Start()
 	}
 

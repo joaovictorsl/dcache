@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/joaovictorsl/dcache/core"
-	"github.com/joaovictorsl/dcache/core/cache"
+	"github.com/joaovictorsl/fooche"
 )
 
 type SetCommand struct {
@@ -23,7 +23,7 @@ func (msg *SetCommand) Type() byte {
 	return core.CMD_SET
 }
 
-func (msg *SetCommand) Execute(c cache.ICache) []byte {
+func (msg *SetCommand) Execute(c fooche.ICache) []byte {
 	err := c.Set(msg.Key, msg.Value, msg.TTL)
 	if err != nil {
 		log.Println(err.Error())

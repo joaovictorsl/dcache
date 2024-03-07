@@ -6,17 +6,17 @@ import (
 	"net"
 
 	"github.com/joaovictorsl/dcache/core"
-	"github.com/joaovictorsl/dcache/core/cache"
 	"github.com/joaovictorsl/dcache/core/protocol"
+	"github.com/joaovictorsl/fooche"
 )
 
 type Server struct {
-	cache    cache.ICache
+	cache    fooche.ICache
 	buffSize uint
 	port     uint16
 }
 
-func NewServer(port uint16, c cache.ICache, maxValueLength uint) *Server {
+func NewServer(port uint16, c fooche.ICache, maxValueLength uint) *Server {
 	return &Server{
 		cache:    c,
 		port:     port,

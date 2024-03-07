@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/joaovictorsl/dcache/core"
-	"github.com/joaovictorsl/dcache/core/cache"
+	"github.com/joaovictorsl/fooche"
 )
 
 type HasCommand struct {
@@ -19,7 +19,7 @@ func (msg *HasCommand) Type() byte {
 	return core.CMD_HAS
 }
 
-func (msg *HasCommand) Execute(c cache.ICache) []byte {
+func (msg *HasCommand) Execute(c fooche.ICache) []byte {
 	found := c.Has(msg.Key)
 
 	var res []byte

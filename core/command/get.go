@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/joaovictorsl/dcache/core"
-	"github.com/joaovictorsl/dcache/core/cache"
+	"github.com/joaovictorsl/fooche"
 )
 
 type GetCommand struct {
@@ -19,7 +19,7 @@ func (msg *GetCommand) Type() byte {
 	return core.CMD_GET
 }
 
-func (msg *GetCommand) Execute(c cache.ICache) []byte {
+func (msg *GetCommand) Execute(c fooche.ICache) []byte {
 	v, err := c.Get(msg.Key)
 	if err != nil {
 		return []byte{core.CMD_EXEC_FAILED}
